@@ -6,101 +6,180 @@
 //
 import SwiftUI
 
-struct TuneStatusView: View {
-    @State var NowPlayingManager: NowPlayingManager
+struct TuneStatusView<T>: View where T: ObservableObject {
+    @State var NowPlayingManager: T
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
         VStack(spacing: 8) {
-            // Album artwork
-            if let artwork = NowPlayingManager.currentEntry.artworkImage {
-                Image(nsImage: artwork)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 320, height: 320)
-                    .cornerRadius(6)
-            } else {
-                Image(systemName: "music.note")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 240, height: 160)
-                    .foregroundColor(.secondary)
-            }
-            
-            // Track info
-            Text(NowPlayingManager.currentEntry.trackName)
-                .font(.headline)
-                .lineLimit(1)
-            
-            Text(NowPlayingManager.currentEntry.artistName)
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .lineLimit(1)
-            
-            // Progress bar
-            HStack {
-                Text(formatTime(NowPlayingManager.currentEntry.currentTime))
-                    .font(.caption)
-                    .monospacedDigit()
-                
-                GeometryReader { geometry in
-                    ZStack(alignment: .leading) {
-                        Rectangle()
-                            .frame(width: geometry.size.width, height: 4)
-                            .opacity(0.3)
-                            .foregroundColor(.gray)
-                            .clipShape(Capsule())
-                        
-                        Rectangle()
-                            .frame(width: min(CGFloat(NowPlayingManager.currentEntry.progressPercentage) * geometry.size.width, geometry.size.width), height: 4)
-                            .foregroundColor(.accentColor)
-                            .clipShape(Capsule())
-                    }
+            // Display the current track information
+            if let npm = NowPlayingManager as? NowPlayingManager {
+                // Full app version
+                trackInfoView(entry: npm.currentEntry)
+                // Controls
+                ZStack {
+                    // This makes the entire widget clickable but with different zones
+                    VStack {
+                        HStack(spacing: 20) {
+                            // Previous button area (left third)
+                            Button("Back", systemImage: "backward.fill", action: { npm.prevTrack() })
+                                .labelStyle(.iconOnly)
+                                .buttonStyle(PlainButtonStyle())
+                            // Play/pause button area (middle third)
+                            Button(
+                                npm.currentEntry.isPlaying ? "Pause" : "Play",
+                                systemImage: npm.currentEntry.isPlaying ? "pause.fill" : "play.fill",
+                                action: {
+                                    npm.playPause()
+                                }
+                            )
+                                .labelStyle(.iconOnly)
+                                .buttonStyle(PlainButtonStyle())
+                            // Next button area (right third)
+                            Button("Forward", systemImage: "forward.fill", action: {
+                                npm.nextTrack()
+                            })
+                                .labelStyle(.iconOnly)
+                                .buttonStyle(PlainButtonStyle())
+                        }
+                        .padding(.top, 4)
+                    }.padding(.bottom, 20)
                 }
-                .frame(height: 4)
-                Text(formatTime(NowPlayingManager.currentEntry.duration))
-                    .font(.caption)
-                    .monospacedDigit()
-            }
-            
-            // Controls
-            ZStack {
-                // This makes the entire widget clickable but with different zones
-                VStack {
-                    HStack(spacing: 20) {
-                        // Previous button area (left third)
-                        Button("Back", systemImage: "backward.fill", action: { NowPlayingManager.prevTrack() })
-                            .labelStyle(.iconOnly)
-                            .buttonStyle(PlainButtonStyle())
-                        // Play/pause button area (middle third)
-                        Button(
-                            NowPlayingManager.currentEntry.isPlaying ? "Pause" : "Play",
-                            systemImage: NowPlayingManager.currentEntry.isPlaying ? "pause.fill" : "play.fill",
-                            action: {
-                                NowPlayingManager.playPause()
-                            }
-                        )
-                            .labelStyle(.iconOnly)
-                            .buttonStyle(PlainButtonStyle())
-                        // Next button area (right third)
-                        Button("Forward", systemImage: "forward.fill", action: {
-                            NowPlayingManager.nextTrack()
-                        })
-                            .labelStyle(.iconOnly)
-                            .buttonStyle(PlainButtonStyle())
-                    }
-                    .padding(.top, 4)
-                }.padding(.bottom, 20)
-            }
-            .padding(.top, 4)
-        }
-        .frame(minWidth: 320, idealWidth: 320, maxWidth: 320, minHeight: 480, idealHeight: 480, maxHeight: 480, alignment: .center)
-        .onReceive(timer) { _ in
-            if (NowPlayingManager.currentEntry.isPlaying) {
-                NowPlayingManager.currentEntry.currentTime += 1
+                .padding(.top, 4)
+            } else if let widgetNPM = NowPlayingManager as? WidgetNowPlayingManager {
+                // Widget version
+                widgetTrackInfoView(entry: widgetNPM.currentEntry)
             }
         }
     }
+        
+        private func trackInfoView(entry: TuneStatusEntry) -> some View {
+            // Album artwork
+            VStack(alignment: .center) {
+                if let artwork = entry.artworkImage {
+                    Image(nsImage: artwork)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 320, height: 320)
+                        .cornerRadius(6)
+                } else {
+                    Image(systemName: "music.note")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 240, height: 160)
+                        .foregroundColor(.secondary)
+                }
+                // Track info
+                Text(entry.trackName)
+                    .font(.title2)
+                    .lineLimit(1)
+                
+                Text(entry.artistName)
+                    .font(.title3)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                Text(entry.albumName)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+
+                // Progress bar
+                HStack {
+                    Text(formatTime(entry.currentTime))
+                        .font(.caption)
+                        .monospacedDigit()
+                    
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            Rectangle()
+                                .frame(width: geometry.size.width, height: 4)
+                                .opacity(0.3)
+                                .foregroundColor(.gray)
+                                .clipShape(Capsule())
+                            
+                            Rectangle()
+                                .frame(width: min(CGFloat(entry.progressPercentage) * geometry.size.width, geometry.size.width), height: 4)
+                                .foregroundColor(.accentColor)
+                                .clipShape(Capsule())
+                        }
+                    }
+                    .frame(height: 4)
+                    Text(formatTime(entry.duration))
+                        .font(.caption)
+                        .monospacedDigit()
+                }
+            }
+        }
+    
+    private func widgetTrackInfoView(entry: TuneStatusEntry) -> some View {
+           VStack(alignment: .leading, spacing: 8) {
+               // Artwork image if available
+               if let artwork = entry.artworkImage {
+                   Image(nsImage: artwork)
+                       .resizable()
+                       .aspectRatio(contentMode: .fit)
+                       .frame(width: 200, height: 200)
+                       .cornerRadius(8)
+               } else {
+                   // Placeholder if no artwork
+                   Rectangle()
+                       .fill(Color.gray.opacity(0.3))
+                       .frame(width: 200, height: 200)
+                       .cornerRadius(8)
+                       .overlay(
+                           Image(systemName: "music.note")
+                               .font(.system(size: 50))
+                               .foregroundColor(.gray)
+                       )
+               }
+               
+               // Track info
+               Text(entry.trackName)
+                   .font(.title2)
+                   .fontWeight(.bold)
+                   .lineLimit(1)
+               
+               Text(entry.artistName)
+                   .font(.title3)
+                   .foregroundColor(.secondary)
+                   .lineLimit(1)
+               
+               Text(entry.albumName)
+                   .font(.subheadline)
+                   .foregroundColor(.secondary)
+                   .lineLimit(1)
+               
+//               // Playback progress
+//               ProgressView(value: entry.progressPercentage)
+//                   .progressViewStyle(LinearProgressViewStyle())
+//                   .padding(.vertical, 4)
+//               
+//               // Time display
+//               HStack {
+//                   Text(formatTime(entry.currentTime))
+//                       .font(.caption)
+//                       .foregroundColor(.secondary)
+//                   
+//                   Spacer()
+//                   
+//                   Text(formatTime(entry.duration))
+//                       .font(.caption)
+//                       .foregroundColor(.secondary)
+//               }
+               
+               // Playback state indicator
+               HStack {
+                   Circle()
+                       .fill(entry.isPlaying ? Color.green : Color.red)
+                       .frame(width: 10, height: 10)
+                   
+                   Text(entry.isPlaying ? "Playing" : "Paused")
+                       .font(.caption)
+                       .foregroundColor(.secondary)
+               }
+           }
+       }
     
     private func formatTime(_ timeInterval: TimeInterval) -> String {
         let minutes = Int(timeInterval) / 60
@@ -115,3 +194,4 @@ struct TuneStatusPreview : PreviewProvider {
         return TuneStatusView(NowPlayingManager: npmanager).frame(width: 320, height: 480)
     }
 }
+

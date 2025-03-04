@@ -11,19 +11,19 @@ struct SpotifyApi {
     static let osaStart = "tell application \"Spotify\" to"
     
     static func getState() ->String{
-        return executeScript(phrase: "player state")
+        return genericApi.executeScript(phrase: "player state", bespokeScript: nil, osaString: osaStart)
     }
 
     static func getTitle() -> String{
-        return executeScript(phrase: "name of current track")
+        return genericApi.executeScript(phrase: "name of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getAlbum() -> String{
-        return executeScript(phrase: "album of current track")
+        return genericApi.executeScript(phrase: "album of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getArtist() -> String{
-        return executeScript(phrase: "artist of current track")
+        return genericApi.executeScript(phrase: "artist of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getCover() -> NSData?{
@@ -34,59 +34,41 @@ struct SpotifyApi {
         end tell
 
         """
-        let url = URL(string:(executeScript(phrase: nil, bespokeScript: imgScript)))
+        let url = URL(string:(genericApi.executeScript(phrase: nil, bespokeScript: imgScript)))
         let result: NSData? = url != nil ? NSData(contentsOf:  url!) : nil
         
         return result
     }
     
     static func getVolume() -> String{
-        return executeScript(phrase: "sound volume")
+        return genericApi.executeScript(phrase: "sound volume", bespokeScript: nil, osaString: osaStart)
     }
     
     static func setVolume(level: Int){
-        executeScript(phrase: "set sound volume to \(level)")
+        genericApi.executeScript(phrase: "set sound volume to \(level)", bespokeScript: nil, osaString: osaStart)
     }
     
     static func toNextTrack(){
-        executeScript(phrase: "next track")
+        genericApi.executeScript(phrase: "next track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func toPreviousTrack(){
-        executeScript(phrase: "previous track")
+        genericApi.executeScript(phrase: "previous track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func toPlayPause(){
-        executeScript(phrase: "playpause")
+        genericApi.executeScript(phrase: "playpause", bespokeScript: nil, osaString: osaStart)
     }
     
     static func openSpotify(){
-        executeScript(phrase: "activate")
-    }
-    
-    static func executeScript(phrase: String? = "", bespokeScript: String? = nil) -> String{
-        var output = ""
-        var script : NSAppleScript? = NSAppleScript(source: "")
-        if let bespokeScript {
-            script = NSAppleScript(source: bespokeScript )
-        } else {
-            if let phrase {
-                script = NSAppleScript(source: "\(osaStart) \(phrase)" )
-            }
-        }
-        var errorInfo: NSDictionary?
-        var descriptor = script?.executeAndReturnError(&errorInfo)
-        if(descriptor?.stringValue != nil){
-            output = descriptor!.stringValue!
-        }
-        return output
+        genericApi.executeScript(phrase: "activate", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getDuration() -> String{
-        return executeScript(phrase: "duration of current track")
+        return genericApi.executeScript(phrase: "duration of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getPosition() -> String{
-        return executeScript(phrase: "position of current track")
+        return genericApi.executeScript(phrase: "position of current track", bespokeScript: nil, osaString: osaStart)
     }
 }

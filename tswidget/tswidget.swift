@@ -8,60 +8,74 @@
 import WidgetKit
 import SwiftUI
 
-struct Provider: AppIntentTimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
-    }
-
-    func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+struct Provider: TimelineProvider {
+    func placeholder(in context: Context) -> NowPlayingWidgetEntry {
+        // Create a placeholder entry with dummy data
+        let dummyManager = WidgetNowPlayingManager()
+        return NowPlayingWidgetEntry(date: Date(), manager: dummyManager)
     }
     
-    func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
-        }
-
-        return Timeline(entries: entries, policy: .atEnd)
+    func getSnapshot(in context: Context, completion: @escaping @Sendable (NowPlayingWidgetEntry) -> Void) {
+        // Create a snapshot with sample data for preview
+        let snapshotManager = WidgetNowPlayingManager()
+        let entry = NowPlayingWidgetEntry(date: Date(), manager: snapshotManager)
+        completion(entry)
     }
 
-//    func relevances() async -> WidgetRelevances<ConfigurationAppIntent> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
+    func getTimeline(in context: Context, completion: @escaping (Timeline<NowPlayingWidgetEntry>) -> Void) {
+        let currentDate = Date()
+        
+        // Load shared data
+        let sharedData = SharedTuneStatusData.load()
+        
+        // Create manager from shared data
+        let manager = WidgetNowPlayingManager(from: sharedData)
+        
+        // Create timeline entry
+        let entry = NowPlayingWidgetEntry(date: currentDate, manager: manager)
+        
+        // Update every second to keep track of playback position
+        let nextUpdate = Calendar.current.date(byAdding: .second, value: 1, to: currentDate)!
+        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
+        
+        completion(timeline)
+    }
 }
 
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let configuration: ConfigurationAppIntent
+struct NowPlayingWidgetEntry: TimelineEntry {
+    var date: Date
+    let manager: WidgetNowPlayingManager
 }
 
 struct tswidgetEntryView : View {
     var entry: Provider.Entry
+    
+    @Environment(\.widgetFamily) var family
 
     var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
-
-            Text("Favorite Emoji:")
-            Text(entry.configuration.favoriteEmoji)
-        }
+        TuneStatusView(NowPlayingManager: entry.manager)
+            .containerBackground(Color.black, for: .widget)
     }
 }
 
 struct tswidget: Widget {
-    let kind: String = "tswidget"
+    let kind: String = "TuneStatus Widget"
 
     var body: some WidgetConfiguration {
-        AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
+        StaticConfiguration(kind: kind, provider: Provider()) { entry in
             tswidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
         }
+        .configurationDisplayName("TuneStatus Widget")
+        .description("Displays your current playing song.")
+        .supportedFamilies([.systemLarge, .systemExtraLarge])
+    }
+}
+
+// Preview provider
+struct tswidget_Previews: PreviewProvider {
+    static var previews: some View {
+        let sampleManager = WidgetNowPlayingManager()
+        tswidgetEntryView(entry: NowPlayingWidgetEntry(date: Date(), manager: sampleManager))
+            .previewContext(WidgetPreviewContext(family: .systemLarge))
     }
 }

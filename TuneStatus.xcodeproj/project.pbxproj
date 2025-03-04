@@ -54,8 +54,10 @@
 		FD7ECE242D7643E5008B03FE /* Exceptions for "TuneStatus" folder in "tswidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				genericApi.swift,
 				MusicApi.swift,
 				NowPlayingManager.swift,
+				SharedTuneStatusData.swift,
 				SpotifyApi.swift,
 				TuneStatusView.swift,
 			);
@@ -65,6 +67,13 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+			);
+			target = FD7ECDF12D763D3F008B03FE /* TuneStatus */;
+		};
+		FDA108D02D77A7B60033C05D /* Exceptions for "tswidget" folder in "TuneStatus" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				WidgetNowPlayingManager.swift,
 			);
 			target = FD7ECDF12D763D3F008B03FE /* TuneStatus */;
 		};
@@ -83,6 +92,7 @@
 		FD7ECE0E2D763E12008B03FE /* tswidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				FDA108D02D77A7B60033C05D /* Exceptions for "tswidget" folder in "TuneStatus" target */,
 				FD7ECE1C2D763E14008B03FE /* Exceptions for "tswidget" folder in "tswidgetExtension" target */,
 			);
 			path = tswidget;

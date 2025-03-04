@@ -7,6 +7,7 @@
 
 import Foundation
 import Cocoa
+import WidgetKit
 
 struct TuneStatusEntry {
     var date: Date
@@ -17,6 +18,7 @@ struct TuneStatusEntry {
     var currentTime: TimeInterval
     var duration: TimeInterval
     var isPlaying: Bool
+    var artworkBase64: String?
     
     // Computed property for progress percentage
     var progressPercentage: Double {
@@ -34,6 +36,7 @@ enum buttonState {
 enum supportedApps {
     case Music
     case Spotify
+    case generic
 }
 
 class NowPlayingManager : ObservableObject {
@@ -56,18 +59,23 @@ class NowPlayingManager : ObservableObject {
     
     // Track the last source of data
     private var lastDataSource: String = "none"
-    private var app: supportedApps = .Spotify
+    // Make app property accessible (previously private)
+    var app: supportedApps = .generic
     
     init() {
         // Setup everything
         setupNotificationObservers()
-        let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+        print("Notification observers set up")
         
         // Initial update attempt
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            //            self?.updateNowPlayingInfo()
-            print("Trying to update")
+            print("Trying to get first update")
+            genericApi.pressPlayPauseKey()
+            genericApi.pressPlayPauseKey()
         }
+        
+        // Set up timer to periodically update shared data for the widget
+        setupSharedDataTimer()
         
         if debugMode {
             print("NowPlayingManager initialized")
@@ -104,6 +112,30 @@ class NowPlayingManager : ObservableObject {
         
         if debugMode {
             print("Notification observers set up")
+        }
+    }
+    
+    // Setup timer to update shared data periodically
+    private func setupSharedDataTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            if (self.currentEntry.isPlaying) {
+                 self.currentEntry.currentTime += 1
+//                 self.updateSharedData()
+             }
+        }
+    }
+    
+    // Update shared data for widgets
+    private func updateSharedData() {
+        // Create shared data from current state
+        let sharedData = SharedTuneStatusData(from: self)
+        
+        // Save to shared container
+        sharedData.save()
+        
+        if debugMode {
+            print("Updated shared data for widget: \(sharedData.trackName)")
         }
     }
     
@@ -157,9 +189,17 @@ class NowPlayingManager : ObservableObject {
             if let artworkData = MusicApi.getCover() as? Data,
                let image = NSImage(data: artworkData) {
                 currentEntry.artworkImage = image
+                guard let coverImage = NSImage(data: artworkData) else { return }
+                currentEntry.artworkBase64 = SharedTuneStatusData.convertImageToBase64(image: coverImage)
+                updateSharedData()
+                WidgetCenter.shared.reloadTimelines(ofKind: "TuneStatus Widget")
             }
         }
         lastUpdateTime = Date()
+        
+        // Update shared data for widget
+        updateSharedData()
+        WidgetCenter.shared.reloadTimelines(ofKind: "TuneStatus Widget")
     }
     
     @objc private func handleSpotifyNotification(_ notification: Notification) {
@@ -198,22 +238,6 @@ class NowPlayingManager : ObservableObject {
             currentEntry.albumName = albumName
         }
         
-        if let hasArtwork = userInfo["Has Artwork"] as? Bool, hasArtwork, !sameTrack {
-            // Dispatch the cover download to a background thread.
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                // Call SpotifyApi.getCover() on a background thread.
-                guard let imageData = SpotifyApi.getCover() as? Data,
-                      let coverImage = NSImage(data: imageData) else {
-                    return
-                }
-                
-                // Update the UI on the main thread.
-                DispatchQueue.main.async {
-                    self?.currentEntry.artworkImage = coverImage
-                }
-            }
-        }
-        
         // Duration and position
         if let duration = userInfo["Duration"] as? Double {
             currentEntry.duration = duration / 1000.0 // Spotify returns in milliseconds
@@ -223,28 +247,58 @@ class NowPlayingManager : ObservableObject {
             currentEntry.currentTime = position
         }
         
+        if let hasArtwork = userInfo["Has Artwork"] as? Bool, hasArtwork, !sameTrack {
+            // Dispatch the cover download to a background thread.
+            DispatchQueue.global(qos: .background).async { [weak self] in
+                // Call SpotifyApi.getCover() on a background thread.
+                guard let imageData = SpotifyApi.getCover() as? Data,
+                      let coverImage = NSImage(data: imageData) else {
+                    return
+                }
+                    
+                // Update the UI on the main thread.
+                DispatchQueue.main.async {
+                    self?.currentEntry.artworkImage = coverImage
+                }
+                
+                DispatchQueue.main.async { [weak self] in
+                    guard let coverImage = NSImage(data: imageData) else { return }
+                    self?.currentEntry.artworkBase64 = SharedTuneStatusData.convertImageToBase64(image: coverImage)
+                    self?.updateSharedData()
+                    WidgetCenter.shared.reloadTimelines(ofKind: "TuneStatus Widget")
+                }
+            }
+        } else {
+            // Update shared data for widget
+            updateSharedData()
+            WidgetCenter.shared.reloadTimelines(ofKind: "TuneStatus Widget")
+        }
         lastUpdateTime = Date()
     }
     
     //MARK: Control Streams
     func playPause() {
         switch app {
-        case .Spotify:
-            SpotifyApi.toPlayPause()
-        case .Music:
-            MusicApi.toPlayPause()
+            case .Spotify:
+                SpotifyApi.toPlayPause()
+            case .Music:
+                MusicApi.toPlayPause()
+            case .generic:
+                genericApi.pressPlayPauseKey()
         }
     }
-    
+        
     func nextTrack() {
         switch app {
-        case .Spotify:
-            SpotifyApi.toNextTrack()
-        case .Music:
-            MusicApi.toNextTrack()
+            case .Spotify:
+                SpotifyApi.toNextTrack()
+            case .Music:
+                MusicApi.toNextTrack()
+            case .generic:
+                genericApi.pressNextTrackKey()
+            }
         }
-    }
-    
+        
     func prevTrack() {
         currentEntry.currentTime = 0
         switch app {
@@ -252,6 +306,8 @@ class NowPlayingManager : ObservableObject {
             SpotifyApi.toPreviousTrack()
         case .Music:
             MusicApi.toPreviousTrack()
+        case .generic:
+            genericApi.pressPreviousTrackKey()
         }
     }
 }

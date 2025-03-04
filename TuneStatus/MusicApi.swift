@@ -11,19 +11,19 @@ struct MusicApi {
     static let osaStart = "tell application \"Music\" to"
     
     static func getState() -> String {
-        return executeScript(phrase: "player state")
+        return genericApi.executeScript(phrase: "player state", bespokeScript: nil, osaString: osaStart)
     }
 
     static func getTitle() -> String {
-        return executeScript(phrase: "name of current track")
+        return genericApi.executeScript(phrase: "name of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getAlbum() -> String {
-        return executeScript(phrase: "album of current track")
+        return genericApi.executeScript(phrase: "album of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getArtist() -> String {
-        return executeScript(phrase: "artist of current track")
+        return genericApi.executeScript(phrase: "artist of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getCover() -> NSData? {
@@ -54,31 +54,31 @@ struct MusicApi {
     }
     
     static func getVolume() -> String {
-        return executeScript(phrase: "sound volume")
+        return genericApi.executeScript(phrase: "sound volume", bespokeScript: nil, osaString: osaStart)
     }
     
     static func setVolume(level: Int) {
-        executeScript(phrase: "set sound volume to \(level)")
+        genericApi.executeScript(phrase: "set sound volume to \(level)")
     }
     
     static func toNextTrack() {
-        executeScript(phrase: "next track")
+        genericApi.executeScript(phrase: "next track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func toPreviousTrack() {
-        executeScript(phrase: "previous track")
+        genericApi.executeScript(phrase: "previous track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func toPlayPause() {
-        executeScript(phrase: "playpause")
+        genericApi.executeScript(phrase: "playpause", bespokeScript: nil, osaString: osaStart)
     }
     
     static func openMusic() {
-        executeScript(phrase: "activate")
+        genericApi.executeScript(phrase: "activate", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getDuration() -> String {
-        return executeScript(phrase: "duration of current track")
+        return genericApi.executeScript(phrase: "duration of current track", bespokeScript: nil, osaString: osaStart)
     }
     
     static func getPosition() -> TimeInterval {
@@ -98,7 +98,7 @@ struct MusicApi {
             end try
         """
         
-        let timeString = executeScript(phrase: nil, bespokeScript: positionScript)
+        let timeString = genericApi.executeScript(phrase: nil, bespokeScript: positionScript)
         let parts = timeString.components(separatedBy: ":")
         guard parts.count == 3,
               let hours = Double(parts[0]),
@@ -116,19 +116,4 @@ struct MusicApi {
         return hours * 3600 + minutes * 60 + seconds
     }
     
-    static func executeScript(phrase: String? = "", bespokeScript: String? = nil) -> String {
-        var output = ""
-        var script: NSAppleScript? = NSAppleScript(source: "")
-        if let bespokeScript = bespokeScript {
-            script = NSAppleScript(source: bespokeScript)
-        } else if let phrase = phrase {
-            script = NSAppleScript(source: "\(osaStart) \(phrase)")
-        }
-        var errorInfo: NSDictionary?
-        let descriptor = script?.executeAndReturnError(&errorInfo)
-        if let descriptorString = descriptor?.stringValue {
-            output = descriptorString
-        }
-        return output
-    }
 }
