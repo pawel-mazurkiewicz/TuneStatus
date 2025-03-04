@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct TuneStatusApp: App {
+    @StateObject private var nowPlayingManager = NowPlayingManager()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(nowPlayingManager)
         }
     }
 }
+

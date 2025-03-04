@@ -6,14 +6,86 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FD7ECE0B2D763E12008B03FE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD7ECE0A2D763E12008B03FE /* WidgetKit.framework */; };
+		FD7ECE0D2D763E12008B03FE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FD7ECE0C2D763E12008B03FE /* SwiftUI.framework */; };
+		FD7ECE1B2D763E14008B03FE /* tswidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FD7ECE082D763E12008B03FE /* tswidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FD7ECE192D763E14008B03FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FD7ECDEA2D763D3F008B03FE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FD7ECE072D763E12008B03FE;
+			remoteInfo = tswidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FD7ECE202D763E14008B03FE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FD7ECE1B2D763E14008B03FE /* tswidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		FD7ECDF22D763D3F008B03FE /* TuneStatus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TuneStatus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD7ECE082D763E12008B03FE /* tswidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = tswidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD7ECE0A2D763E12008B03FE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		FD7ECE0C2D763E12008B03FE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		FD7ECE1C2D763E14008B03FE /* Exceptions for "tswidget" folder in "tswidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FD7ECE072D763E12008B03FE /* tswidgetExtension */;
+		};
+		FD7ECE242D7643E5008B03FE /* Exceptions for "TuneStatus" folder in "tswidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				MusicApi.swift,
+				NowPlayingManager.swift,
+				SpotifyApi.swift,
+				TuneStatusView.swift,
+			);
+			target = FD7ECE072D763E12008B03FE /* tswidgetExtension */;
+		};
+		FD7ECE2E2D766B98008B03FE /* Exceptions for "TuneStatus" folder in "TuneStatus" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FD7ECDF12D763D3F008B03FE /* TuneStatus */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		FD7ECDF42D763D3F008B03FE /* TuneStatus */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FD7ECE2E2D766B98008B03FE /* Exceptions for "TuneStatus" folder in "TuneStatus" target */,
+				FD7ECE242D7643E5008B03FE /* Exceptions for "TuneStatus" folder in "tswidgetExtension" target */,
+			);
 			path = TuneStatus;
+			sourceTree = "<group>";
+		};
+		FD7ECE0E2D763E12008B03FE /* tswidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FD7ECE1C2D763E14008B03FE /* Exceptions for "tswidget" folder in "tswidgetExtension" target */,
+			);
+			path = tswidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,6 +98,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FD7ECE052D763E12008B03FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FD7ECE0D2D763E12008B03FE /* SwiftUI.framework in Frameworks */,
+				FD7ECE0B2D763E12008B03FE /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -33,6 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				FD7ECDF42D763D3F008B03FE /* TuneStatus */,
+				FD7ECE0E2D763E12008B03FE /* tswidget */,
+				FD7ECE092D763E12008B03FE /* Frameworks */,
 				FD7ECDF32D763D3F008B03FE /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +124,18 @@
 			isa = PBXGroup;
 			children = (
 				FD7ECDF22D763D3F008B03FE /* TuneStatus.app */,
+				FD7ECE082D763E12008B03FE /* tswidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FD7ECE092D763E12008B03FE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FD7ECE0A2D763E12008B03FE /* WidgetKit.framework */,
+				FD7ECE0C2D763E12008B03FE /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +148,12 @@
 				FD7ECDEE2D763D3F008B03FE /* Sources */,
 				FD7ECDEF2D763D3F008B03FE /* Frameworks */,
 				FD7ECDF02D763D3F008B03FE /* Resources */,
+				FD7ECE202D763E14008B03FE /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				FD7ECE1A2D763E14008B03FE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				FD7ECDF42D763D3F008B03FE /* TuneStatus */,
@@ -69,6 +164,28 @@
 			productName = TuneStatus;
 			productReference = FD7ECDF22D763D3F008B03FE /* TuneStatus.app */;
 			productType = "com.apple.product-type.application";
+		};
+		FD7ECE072D763E12008B03FE /* tswidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FD7ECE1D2D763E14008B03FE /* Build configuration list for PBXNativeTarget "tswidgetExtension" */;
+			buildPhases = (
+				FD7ECE042D763E12008B03FE /* Sources */,
+				FD7ECE052D763E12008B03FE /* Frameworks */,
+				FD7ECE062D763E12008B03FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FD7ECE0E2D763E12008B03FE /* tswidget */,
+			);
+			name = tswidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = tswidgetExtension;
+			productReference = FD7ECE082D763E12008B03FE /* tswidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +198,9 @@
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					FD7ECDF12D763D3F008B03FE = {
+						CreatedOnToolsVersion = 16.2;
+					};
+					FD7ECE072D763E12008B03FE = {
 						CreatedOnToolsVersion = 16.2;
 					};
 				};
@@ -100,12 +220,20 @@
 			projectRoot = "";
 			targets = (
 				FD7ECDF12D763D3F008B03FE /* TuneStatus */,
+				FD7ECE072D763E12008B03FE /* tswidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FD7ECDF02D763D3F008B03FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FD7ECE062D763E12008B03FE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +250,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FD7ECE042D763E12008B03FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FD7ECE1A2D763E14008B03FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FD7ECE072D763E12008B03FE /* tswidgetExtension */;
+			targetProxy = FD7ECE192D763E14008B03FE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		FD7ECDFF2D763D41008B03FE /* Debug */ = {
@@ -257,12 +400,13 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TuneStatus/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chillaid.art.TuneStatus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -284,14 +428,73 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TuneStatus/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.chillaid.art.TuneStatus;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		FD7ECE1E2D763E14008B03FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = tswidget/tswidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B32NBD6HCA;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = tswidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = tswidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chillaid.art.TuneStatus.tswidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		FD7ECE1F2D763E14008B03FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = tswidget/tswidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B32NBD6HCA;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = tswidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = tswidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.chillaid.art.TuneStatus.tswidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -314,6 +517,15 @@
 			buildConfigurations = (
 				FD7ECE022D763D41008B03FE /* Debug */,
 				FD7ECE032D763D41008B03FE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FD7ECE1D2D763E14008B03FE /* Build configuration list for PBXNativeTarget "tswidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FD7ECE1E2D763E14008B03FE /* Debug */,
+				FD7ECE1F2D763E14008B03FE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
