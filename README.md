@@ -13,7 +13,7 @@ Probably (a few) more to come
 
 ## Installation
 
-Just download the release from Releases page and put the .app in your /Applications folder.
+Just download the release zip from Releases page, extract and put the .app in your /Applications folder.
 
 ## Permissions
 
