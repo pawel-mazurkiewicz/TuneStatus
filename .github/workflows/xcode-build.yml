@@ -8,23 +8,39 @@ on:
 
 jobs:
   build:
-    name: Build and analyse default scheme using xcodebuild command
     runs-on: macos-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set Default Scheme
-        run: |
-          scheme_list=$(xcodebuild -list -json | tr -d "\n")
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
-          echo $default | cat >default
-          echo Using default scheme: $default
-      - name: Build
-        env:
-          scheme: ${{ 'default' }}
-        run: |
-          if [ $scheme = default ]; then scheme=$(cat default); fi
-          if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
-          file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
-          xcodebuild clean build analyze -scheme "$scheme" -"$filetype_parameter" "$file_to_build" | xcpretty && exit ${PIPESTATUS[0]}
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: ^16.1
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Set Default Scheme
+      run: |
+        scheme_list=$(xcodebuild -list -json | tr -d "\n")
+        default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
+        echo $default | cat >default
+        echo Using default scheme: $default
+    - name: Determine File To Build
+      shell: bash
+      run: |
+        echo "[XCode-Deploy]: Determining file to build..."
+        if [ "`ls -A | grep -i \\.xcworkspace\$`" ]; then filetype_parameter="workspace" \
+        && file_to_build="`ls -A | grep -i \\.xcworkspace\$`"; \
+        else filetype_parameter="project" && file_to_build="`ls -A | grep -i \\.xcodeproj\$`"; fi
+        file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
+        echo "TYPE=$filetype_parameter" >> $GITHUB_ENV
+        echo "FILE_TO_BUILD=$file_to_build" >> $GITHUB_ENV
+        echo "PROJECT_NAME=$(echo "$file_to_build" | cut -f 1 -d '.')" >> $GITHUB_ENV
+    - name: Build and Archive
+      uses: sersoft-gmbh/xcodebuild-action@v2
+      with:
+        action: archive
+        ${{ env.TYPE }}: ${{ env.FILE_TO_BUILD }}
+        scheme: ${{ env.SCHEME }}
+        sdk: macos
+        build-settings: >
+          -archivePath ${{ env.PROJECT_NAME }}.xcarchive
+        derived-data-path: build/derivedData
+        destination: generic/platform=macOS
+          
