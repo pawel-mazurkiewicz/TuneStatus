@@ -54,7 +54,18 @@ struct tswidgetEntryView : View {
 
     var body: some View {
         TuneStatusView(NowPlayingManager: entry.manager)
-            .containerBackground(Color.black, for: .widget)
+//            .containerBackground(Color.black, for: .widget)
+            .containerBackground(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 1.0, green: 0.973, blue: 0.816), // #FFF8D0
+                        Color(red: 1.0, green: 0.596, blue: 0.0)    // #FF9800
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ), for: .widget
+            )
+            .cornerRadius(12)
     }
 }
 
@@ -63,7 +74,17 @@ struct tswidget: Widget {
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            tswidgetEntryView(entry: entry)
+            tswidgetEntryView(entry: entry).containerBackground(
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 1.0, green: 0.973, blue: 0.816), // #FFF8D0
+                        Color(red: 1.0, green: 0.596, blue: 0.0)    // #FF9800
+                    ]),
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ), for: .widget
+            )
+            .cornerRadius(12)
         }
         .configurationDisplayName("TuneStatus Widget")
         .description("Displays your current playing song.")

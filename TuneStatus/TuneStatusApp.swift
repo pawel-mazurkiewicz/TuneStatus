@@ -9,13 +9,19 @@ import SwiftUI
 
 @main
 struct TuneStatusApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var nowPlayingManager = NowPlayingManager()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(nowPlayingManager)
-        }
+        }.windowStyle(HiddenTitleBarWindowStyle())
     }
 }
 
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+
+    }
+}

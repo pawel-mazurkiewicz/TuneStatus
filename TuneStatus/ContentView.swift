@@ -34,12 +34,23 @@ struct ContentView: View {
     var body: some View {
         TuneStatusView(NowPlayingManager: nowPlayingManager)
             .background(WindowAccessor(
-                minSize: NSSize(width: 320, height: 480),
-                maxSize: NSSize(width: 320, height: 480))
+                minSize: NSSize(width: 320, height: 460),
+                maxSize: NSSize(width: 320, height: 460))
             )
             .windowFullScreenBehavior(.disabled)
             .windowResizeBehavior(.disabled)
             .frame(minWidth: 320, idealWidth: 320, maxWidth: 320, minHeight: 480, idealHeight: 480, maxHeight: 480, alignment: .center)
+//            .background(
+//                LinearGradient(
+//                    gradient: Gradient(colors: [
+//                        Color(red: 0.9, green: 0.873, blue: 0.716), // Darker #FFF8D0
+//                        Color(red: 0.9, green: 0.496, blue: 0.0)    // Darker #FF9800
+//                    ]),
+//                    startPoint: .topLeading,
+//                    endPoint: .bottomTrailing
+//                )
+//            )
+            .cornerRadius(12)
     }
     
 }

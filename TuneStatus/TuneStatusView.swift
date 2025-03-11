@@ -73,16 +73,19 @@ struct TuneStatusView<T>: View where T: ObservableObject {
                 Text(entry.trackName)
                     .font(.title2)
                     .lineLimit(1)
+//                    .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.3))
                 
                 Text(entry.artistName)
                     .font(.title3)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
+//                    .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.3).opacity(0.8))
                 
                 Text(entry.albumName)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
+//                    .foregroundColor(Color(red: 0.1, green: 0.2, blue: 0.3).opacity(0.7))
 
                 // Progress bar
                 HStack {
@@ -179,7 +182,7 @@ struct TuneStatusView<T>: View where T: ObservableObject {
                        .foregroundColor(.secondary)
                }
            }
-       }
+    }
     
     private func formatTime(_ timeInterval: TimeInterval) -> String {
         let minutes = Int(timeInterval) / 60
