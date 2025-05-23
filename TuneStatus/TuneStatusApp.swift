@@ -41,12 +41,24 @@ class StatusBarController: NSObject {
     private var nowPlayingManager: NowPlayingManager
     private var cancellables = Set<AnyCancellable>()
     
+    // Scrolling animation properties
+    private var scrollTimer: Timer?
+    private var scrollPosition: Int = 0
+    private var scrollDirection: Int = 1
+    private var fullText: String = ""
+    private var playStatusIcon: String = ""
+    private var isScrolling: Bool = false
+    
     init(nowPlayingManager: NowPlayingManager) {
         self.nowPlayingManager = nowPlayingManager
         super.init()
         setupStatusItem()
         setupPopover()
         setupObservers()
+    }
+    
+    deinit {
+        stopScrolling()
     }
     
     private func setupStatusItem() {
@@ -112,30 +124,105 @@ class StatusBarController: NSObject {
     private func updateMenuBarTitle(with entry: TuneStatusEntry) {
         guard let button = statusItem?.button else { return }
         
-        let playStatusIcon = entry.isPlaying ? "▶" : "⏸"
+        self.playStatusIcon = entry.isPlaying ? "▶" : "⏸"
         
         if entry.trackName != "None" && !entry.trackName.isEmpty && 
            entry.artistName != "None" && !entry.artistName.isEmpty {
             // Create display string with track and artist
-            let fullText = "\(entry.trackName) - \(entry.artistName)"
+            let newFullText = "\(entry.trackName) - \(entry.artistName)"
+            self.fullText = newFullText
             
-            // Truncate if too long to fit in menu bar
             let maxLength = 40
-            let displayText = fullText.count > maxLength 
-                ? String(fullText.prefix(maxLength)) + "..." 
-                : fullText
-            
-            button.title = "\(playStatusIcon) \(displayText)"
+            if newFullText.count > maxLength {
+                // Start scrolling for long text
+                startScrolling()
+            } else {
+                // Stop scrolling and show full text
+                stopScrolling()
+                button.title = "\(playStatusIcon) \(newFullText)"
+            }
         } else if entry.trackName != "None" && !entry.trackName.isEmpty {
             // Fallback to just track name if artist is missing
-            let maxLength = 30
-            let displayName = entry.trackName.count > maxLength 
-                ? String(entry.trackName.prefix(maxLength)) + "..." 
-                : entry.trackName
+            let newFullText = entry.trackName
+            self.fullText = newFullText
             
-            button.title = "\(playStatusIcon) \(displayName)"
+            let maxLength = 30
+            if newFullText.count > maxLength {
+                startScrolling()
+            } else {
+                stopScrolling()
+                button.title = "\(playStatusIcon) \(newFullText)"
+            }
         } else {
+            // No track playing
+            stopScrolling()
             button.title = "♪ No Track"
+        }
+    }
+    
+    private func startScrolling() {
+        guard !isScrolling else { return }
+        
+        isScrolling = true
+        scrollPosition = 0
+        scrollDirection = 1
+        
+        // Show initial text
+        updateScrollingText()
+        
+        // Start timer for scrolling animation
+        scrollTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] _ in
+            self?.updateScrollingText()
+        }
+    }
+    
+    private func stopScrolling() {
+        isScrolling = false
+        scrollTimer?.invalidate()
+        scrollTimer = nil
+        scrollPosition = 0
+        scrollDirection = 1
+    }
+    
+    private func updateScrollingText() {
+        guard let button = statusItem?.button else { return }
+        
+        let maxDisplayLength = 40
+        let textLength = fullText.count
+        
+        // If text fits, just show it
+        if textLength <= maxDisplayLength {
+            button.title = "\(playStatusIcon) \(fullText)"
+            return
+        }
+        
+        // Calculate the visible window of text
+        let maxScrollPosition = textLength - maxDisplayLength
+        
+        // Get the current substring to display
+        let startIndex = fullText.index(fullText.startIndex, offsetBy: scrollPosition)
+        let endIndex = fullText.index(startIndex, offsetBy: min(maxDisplayLength, textLength - scrollPosition))
+        let displayText = String(fullText[startIndex..<endIndex])
+        
+        button.title = "\(playStatusIcon) \(displayText)"
+        
+        // Update scroll position for next frame
+        scrollPosition += scrollDirection
+        
+        // Reverse direction when we hit the boundaries
+        if scrollPosition >= maxScrollPosition {
+            scrollDirection = -1
+            // Pause at the end for a moment
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                // Continue scrolling if still active
+            }
+        } else if scrollPosition <= 0 {
+            scrollDirection = 1
+            scrollPosition = 0
+            // Pause at the beginning for a moment
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                // Continue scrolling if still active
+            }
         }
     }
     
