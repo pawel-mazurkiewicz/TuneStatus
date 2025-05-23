@@ -2,7 +2,7 @@
 //  AboutView.swift
 //  TuneStatus
 //
-//  Created by Paweł Mazurkiewicz on 03/03/2025.
+//  Created by Paweł Mazurkiewicz on 24/05/2025.
 //
 
 import SwiftUI

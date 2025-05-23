@@ -52,6 +52,9 @@ class StatusBarController: NSObject {
     // About window reference
     private var aboutWindow: NSWindow?
     
+    // Settings window reference
+    private var settingsWindow: NSWindow?
+    
     init(nowPlayingManager: NowPlayingManager) {
         self.nowPlayingManager = nowPlayingManager
         super.init()
@@ -91,6 +94,7 @@ class StatusBarController: NSObject {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Show TuneStatus", action: #selector(togglePopover), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "Settings...", action: #selector(showSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem(title: "About TuneStatus", action: #selector(showAbout), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit TuneStatus", action: #selector(quitApp), keyEquivalent: "q"))
@@ -103,6 +107,37 @@ class StatusBarController: NSObject {
         if let button = statusItem?.button {
             menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height), in: button)
         }
+    }
+    
+    @objc private func showSettings() {
+        // Close existing settings window if it exists
+        settingsWindow?.close()
+        
+        // Create the settings view with dismiss closure
+        let settingsView = SettingsView(onDismiss: { [weak self] in
+            self?.settingsWindow?.close()
+            self?.settingsWindow = nil
+        })
+        
+        let hostingController = NSHostingController(rootView: settingsView)
+        
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 400),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        
+        window.center()
+        window.title = "TuneStatus Settings"
+        window.contentViewController = hostingController
+        window.isReleasedWhenClosed = false
+        
+        // Store reference to prevent deallocation
+        settingsWindow = window
+        
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     @objc private func showAbout() {
@@ -118,7 +153,7 @@ class StatusBarController: NSObject {
         let hostingController = NSHostingController(rootView: aboutView)
         
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 550),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
