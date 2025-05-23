@@ -49,6 +49,9 @@ class StatusBarController: NSObject {
     private var playStatusIcon: String = ""
     private var isScrolling: Bool = false
     
+    // About window reference
+    private var aboutWindow: NSWindow?
+    
     init(nowPlayingManager: NowPlayingManager) {
         self.nowPlayingManager = nowPlayingManager
         super.init()
@@ -88,6 +91,8 @@ class StatusBarController: NSObject {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Show TuneStatus", action: #selector(togglePopover), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(NSMenuItem(title: "About TuneStatus", action: #selector(showAbout), keyEquivalent: ""))
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit TuneStatus", action: #selector(quitApp), keyEquivalent: "q"))
         
         // Set target for menu items
@@ -98,6 +103,37 @@ class StatusBarController: NSObject {
         if let button = statusItem?.button {
             menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height), in: button)
         }
+    }
+    
+    @objc private func showAbout() {
+        // Close existing about window if it exists
+        aboutWindow?.close()
+        
+        // Create the about view with dismiss closure
+        let aboutView = AboutView(onDismiss: { [weak self] in
+            self?.aboutWindow?.close()
+            self?.aboutWindow = nil
+        })
+        
+        let hostingController = NSHostingController(rootView: aboutView)
+        
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 500),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        
+        window.center()
+        window.title = "About TuneStatus"
+        window.contentViewController = hostingController
+        window.isReleasedWhenClosed = false
+        
+        // Store reference to prevent deallocation
+        aboutWindow = window
+        
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     @objc private func quitApp() {
