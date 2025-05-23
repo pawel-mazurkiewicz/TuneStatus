@@ -8,10 +8,40 @@
 import SwiftUI
 import ServiceManagement
 
+// MARK: - UserDefaults Keys
+private enum UserDefaultsKeys {
+    static let launchAtLogin = "launchAtLogin"
+    static let showArtistInMenuBar = "showArtistInMenuBar"
+    static let showAlbumInMenuBar = "showAlbumInMenuBar"
+}
+
+// MARK: - UserDefaults Extensions (Swift 6 Style)
+extension UserDefaults {
+    @available(iOS 13.0, macOS 10.15, *)
+    var showArtistInMenuBar: Bool {
+        get { bool(forKey: UserDefaultsKeys.showArtistInMenuBar) }
+        set { set(newValue, forKey: UserDefaultsKeys.showArtistInMenuBar) }
+    }
+    
+    @available(iOS 13.0, macOS 10.15, *)
+    var showAlbumInMenuBar: Bool {
+        get { bool(forKey: UserDefaultsKeys.showAlbumInMenuBar) }
+        set { set(newValue, forKey: UserDefaultsKeys.showAlbumInMenuBar) }
+    }
+    
+    @available(iOS 13.0, macOS 10.15, *)
+    var launchAtLoginSetting: Bool {
+        get { bool(forKey: UserDefaultsKeys.launchAtLogin) }
+        set { set(newValue, forKey: UserDefaultsKeys.launchAtLogin) }
+    }
+}
+
 struct SettingsView: View {
     let onDismiss: () -> Void
     
     @State private var launchAtLogin = false
+    @State private var showArtistInMenuBar = true
+    @State private var showAlbumInMenuBar = false
     @State private var showingAlert = false
     @State private var alertMessage = ""
     
@@ -61,32 +91,71 @@ struct SettingsView: View {
             
             Divider()
             
-            // Future settings can go here
+            // Menu Bar Display Section
             VStack(alignment: .leading, spacing: 12) {
-                Text("Appearance")
+                Text("Menu Bar Display")
                     .font(.headline)
                     .fontWeight(.semibold)
                 
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Menu Bar Display")
-                            .font(.subheadline)
+                VStack(spacing: 8) {
+                    // Show Artist Toggle
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Show Artist Name")
+                                .font(.subheadline)
+                            
+                            Text("Display artist name along with track name")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                         
-                        Text("Show track name and artist in menu bar")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Spacer()
+                        
+                        Toggle("", isOn: $showArtistInMenuBar)
+                            .onChange(of: showArtistInMenuBar) { newValue in
+                                UserDefaults.standard.showArtistInMenuBar = newValue
+                                // Notify the status bar controller about the change
+                                NotificationCenter.default.post(
+                                    name: .menuBarDisplaySettingsChanged,
+                                    object: nil
+                                )
+                            }
                     }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(Color(NSColor.controlBackgroundColor))
+                    .cornerRadius(8)
                     
-                    Spacer()
-                    
-                    // This is always enabled for now, but could be made configurable
-                    Toggle("", isOn: .constant(true))
-                        .disabled(true)
+                    // Show Album Toggle
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Show Album Name")
+                                .font(.subheadline)
+                            
+                            Text("Display album name in menu bar (requires artist to be enabled)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        Toggle("", isOn: $showAlbumInMenuBar)
+                            .disabled(!showArtistInMenuBar) // Disable if artist is not shown
+                            .onChange(of: showAlbumInMenuBar) { newValue in
+                                UserDefaults.standard.showAlbumInMenuBar = newValue
+                                // Notify the status bar controller about the change
+                                NotificationCenter.default.post(
+                                    name: .menuBarDisplaySettingsChanged,
+                                    object: nil
+                                )
+                            }
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(Color(NSColor.controlBackgroundColor))
+                    .cornerRadius(8)
+                    .opacity(showArtistInMenuBar ? 1.0 : 0.6) // Visual feedback when disabled
                 }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(Color(NSColor.controlBackgroundColor))
-                .cornerRadius(8)
             }
             
             Spacer()
@@ -103,10 +172,10 @@ struct SettingsView: View {
             }
         }
         .padding(24)
-        .frame(width: 400, height: 400)
+        .frame(width: 450, height: 500) // Increased height to accommodate new settings
         .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
-            loadCurrentLaunchAtLoginState()
+            loadCurrentSettings()
         }
         .alert("Settings", isPresented: $showingAlert) {
             Button("OK") { }
@@ -115,12 +184,22 @@ struct SettingsView: View {
         }
     }
     
-    private func loadCurrentLaunchAtLoginState() {
+    private func loadCurrentSettings() {
+        // Load launch at login state
         if #available(macOS 13.0, *) {
             launchAtLogin = SMAppService.mainApp.status == .enabled
         } else {
-            // Fallback for older macOS versions
-            launchAtLogin = false
+            launchAtLogin = UserDefaults.standard.launchAtLoginSetting
+        }
+        
+        // Load menu bar display settings with default values
+        showArtistInMenuBar = UserDefaults.standard.object(forKey: UserDefaultsKeys.showArtistInMenuBar) as? Bool ?? true
+        showAlbumInMenuBar = UserDefaults.standard.object(forKey: UserDefaultsKeys.showAlbumInMenuBar) as? Bool ?? false
+        
+        // If album is enabled but artist is disabled, disable album
+        if showAlbumInMenuBar && !showArtistInMenuBar {
+            showAlbumInMenuBar = false
+            UserDefaults.standard.showAlbumInMenuBar = false
         }
     }
     
@@ -132,6 +211,8 @@ struct SettingsView: View {
                 } else {
                     try SMAppService.mainApp.unregister()
                 }
+                // Store in UserDefaults as backup
+                UserDefaults.standard.launchAtLoginSetting = enabled
             } catch {
                 // Revert the toggle state on error
                 launchAtLogin = !enabled
@@ -140,11 +221,15 @@ struct SettingsView: View {
             }
         } else {
             // Fallback for older macOS versions
-            launchAtLogin = false
-            alertMessage = "Launch at login requires macOS 13.0 or later"
-            showingAlert = true
+            UserDefaults.standard.launchAtLoginSetting = enabled
+            launchAtLogin = enabled
         }
     }
+}
+
+// MARK: - Notification Names
+extension Notification.Name {
+    static let menuBarDisplaySettingsChanged = Notification.Name("menuBarDisplaySettingsChanged")
 }
 
 #Preview {

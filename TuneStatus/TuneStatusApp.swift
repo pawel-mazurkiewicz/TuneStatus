@@ -61,6 +61,7 @@ class StatusBarController: NSObject {
         setupStatusItem()
         setupPopover()
         setupObservers()
+        setupSettingsObservers()
         nowPlayingManager.playPause()
         nowPlayingManager.playPause()
     }
@@ -122,7 +123,7 @@ class StatusBarController: NSObject {
         let hostingController = NSHostingController(rootView: settingsView)
         
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 400, height: 400),
+            contentRect: NSRect(x: 0, y: 0, width: 450, height: 500),
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false
@@ -194,15 +195,48 @@ class StatusBarController: NSObject {
             .store(in: &cancellables)
     }
     
+    private func setupSettingsObservers() {
+        // Observe settings changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSettingsChange),
+            name: .menuBarDisplaySettingsChanged,
+            object: nil
+        )
+    }
+    
+    @objc private func handleSettingsChange() {
+        // Refresh the menu bar display with current entry and new settings
+        updateMenuBarTitle(with: nowPlayingManager.currentEntry)
+    }
+    
     private func updateMenuBarTitle(with entry: TuneStatusEntry) {
         guard let button = statusItem?.button else { return }
         
         self.playStatusIcon = entry.isPlaying ? "▶" : "⏸"
         
-        if entry.trackName != "None" && !entry.trackName.isEmpty && 
-           entry.artistName != "None" && !entry.artistName.isEmpty {
-            // Create display string with track and artist
-            let newFullText = "\(entry.trackName) - \(entry.artistName)"
+        // Check if we have a valid track
+        if entry.trackName != "None" && !entry.trackName.isEmpty {
+            // Build display text based on user preferences
+            var displayComponents: [String] = []
+            
+            // Always show track name
+            displayComponents.append(entry.trackName)
+            
+            // Add artist name if enabled and available
+            let showArtist = UserDefaults.standard.object(forKey: "showArtistInMenuBar") as? Bool ?? true
+            if showArtist && entry.artistName != "None" && !entry.artistName.isEmpty {
+                displayComponents.append(entry.artistName)
+            }
+            
+            // Add album name if enabled and available (only if artist is also shown)
+            let showAlbum = UserDefaults.standard.object(forKey: "showAlbumInMenuBar") as? Bool ?? false
+            if showAlbum && showArtist && entry.albumName != "None" && !entry.albumName.isEmpty {
+                displayComponents.append(entry.albumName)
+            }
+            
+            // Create the full display text
+            let newFullText = displayComponents.joined(separator: " - ")
             self.fullText = newFullText
             
             let maxLength = 40
@@ -211,18 +245,6 @@ class StatusBarController: NSObject {
                 startScrolling()
             } else {
                 // Stop scrolling and show full text
-                stopScrolling()
-                button.title = "\(playStatusIcon) \(newFullText)"
-            }
-        } else if entry.trackName != "None" && !entry.trackName.isEmpty {
-            // Fallback to just track name if artist is missing
-            let newFullText = entry.trackName
-            self.fullText = newFullText
-            
-            let maxLength = 30
-            if newFullText.count > maxLength {
-                startScrolling()
-            } else {
                 stopScrolling()
                 button.title = "\(playStatusIcon) \(newFullText)"
             }
