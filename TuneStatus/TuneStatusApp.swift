@@ -55,6 +55,8 @@ class StatusBarController: NSObject {
         setupStatusItem()
         setupPopover()
         setupObservers()
+        nowPlayingManager.playPause()
+        nowPlayingManager.playPause()
     }
     
     deinit {

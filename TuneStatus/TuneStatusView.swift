@@ -18,7 +18,6 @@ struct TuneStatusView<T>: View where T: ObservableObject {
                 trackInfoView(entry: npm.currentEntry)
                 // Controls
                 ZStack {
-                    // This makes the entire widget clickable but with different zones
                     VStack {
                         HStack(spacing: 20) {
                             // Previous button area (left third)

@@ -67,13 +67,6 @@ class NowPlayingManager : ObservableObject {
         setupNotificationObservers()
         print("Notification observers set up")
         
-        // Initial update attempt
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            print("Trying to get first update")
-            genericApi.pressPlayPauseKey()
-            genericApi.pressPlayPauseKey()
-        }
-        
         // Set up timer to periodically update shared data for the widget
         setupSharedDataTimer()
         

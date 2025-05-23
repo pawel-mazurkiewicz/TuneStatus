@@ -3,8 +3,8 @@
 A very simple app with widget and menu item to display what's currently playing on Spotify or Apple Music. Made mostly because there's no official Spotify Now Playing widget of some sorts for Mac and I like the simplicity of just swiping from the right to see what is currently playing.
 
 ## Features
-- Shows your currently playing song from Spotify or Apple Music
-- Shows album art both in app and widget
+- Shows your currently playing song from Spotify or Apple Music on your menu bar
+- Shows album art both in menu item and widget
 - Shows current song time
 - Shows status of playback
 - Can control playback from app window
