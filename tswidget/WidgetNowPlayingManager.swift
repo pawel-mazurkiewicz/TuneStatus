@@ -62,8 +62,6 @@ class WidgetNowPlayingManager: ObservableObject {
             isPlaying: true
         )
         self.app = .Music
-        
-        // Now you can call any instance methods if needed
     }
 
     // Make this a type (static) method instead of an instance method

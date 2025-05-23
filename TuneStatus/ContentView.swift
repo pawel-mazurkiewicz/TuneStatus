@@ -40,19 +40,8 @@ struct ContentView: View {
             .windowFullScreenBehavior(.disabled)
             .windowResizeBehavior(.disabled)
             .frame(minWidth: 320, idealWidth: 320, maxWidth: 320, minHeight: 480, idealHeight: 480, maxHeight: 480, alignment: .center)
-//            .background(
-//                LinearGradient(
-//                    gradient: Gradient(colors: [
-//                        Color(red: 0.9, green: 0.873, blue: 0.716), // Darker #FFF8D0
-//                        Color(red: 0.9, green: 0.496, blue: 0.0)    // Darker #FF9800
-//                    ]),
-//                    startPoint: .topLeading,
-//                    endPoint: .bottomTrailing
-//                )
-//            )
             .cornerRadius(12)
     }
-    
 }
 
 struct ContentViewPreview : PreviewProvider {
