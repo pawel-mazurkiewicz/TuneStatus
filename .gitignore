@@ -7,6 +7,8 @@ xcuserdata/
 *.xcodeproj/project.xcworkspace/xcuserdata/
 DerivedData/
 build/
+*.xcbkptlist
+buildServer.json
 
 # Swift Package Manager
 .build/
